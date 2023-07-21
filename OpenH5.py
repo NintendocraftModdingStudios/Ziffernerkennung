@@ -43,31 +43,31 @@ def clear_canvas():
 
 # Funktion zum Berichtigen der erkannten Zahl
 def correct_number(is_correct):
-    global corrected_number
+    global correction_popup, second_correction_popup
     if is_correct:
         # Pop-up anzeigen
-        popup = Toplevel(root)
-        popup.title("Berichtigung")
-        popup.geometry("200x100")
-        popup.configure(bg="white")
+        correction_popup = Toplevel(root)
+        correction_popup.title("Berichtigung")
+        correction_popup.geometry("200x100")
+        correction_popup.configure(bg="white")
 
-        correction_label = Label(popup, text="Vielen Dank für dein Feedback!", font=("Arial", 12), bg="white")
+        correction_label = Label(correction_popup, text="Vielen Dank für dein Feedback!", font=("Arial", 12), bg="white")
         correction_label.pack(pady=10)
 
-        close_button = Button(popup, text="Schließen", command=popup.destroy, font=("Arial", 12), bg="#2196F3", fg="white", relief="groove")
+        close_button = Button(correction_popup, text="Schließen", command=lambda: close_popup(correction_popup), font=("Arial", 12), bg="#2196F3", fg="white", relief="groove")
         close_button.pack()
 
     else:
         # Pop-up für Falsch erkannt anzeigen
-        popup = Toplevel(root)
-        popup.title("Berichtigung")
-        popup.geometry("250x150")
-        popup.configure(bg="white")
+        correction_popup = Toplevel(root)
+        correction_popup.title("Berichtigung")
+        correction_popup.geometry("250x150")
+        correction_popup.configure(bg="white")
 
-        correction_label = Label(popup, text="Bitte richtige Zahl eingeben:", font=("Arial", 12), bg="white")
+        correction_label = Label(correction_popup, text="Bitte richtige Zahl eingeben:", font=("Arial", 12), bg="white")
         correction_label.pack(pady=10)
 
-        correction_entry = Entry(popup, font=("Arial", 16), justify="center")
+        correction_entry = Entry(correction_popup, font=("Arial", 16), justify="center")
         correction_entry.pack(pady=10)
 
         def continue_correction():
@@ -75,15 +75,15 @@ def correct_number(is_correct):
             corrected_number = int(correction_entry.get())
 
             # Pop-up für zweite Berichtigung
-            second_popup = Toplevel(root)
-            second_popup.title("Berichtigung")
-            second_popup.geometry("300x150")
-            second_popup.configure(bg="white")
+            second_correction_popup = Toplevel(root)
+            second_correction_popup.title("Berichtigung")
+            second_correction_popup.geometry("300x150")
+            second_correction_popup.configure(bg="white")
 
-            correction_label = Label(second_popup, text="Dein Ergebnis wurde erfolgreich zu {} berichtigt.".format(corrected_number), font=("Arial", 12), bg="white")
+            correction_label = Label(second_correction_popup, text="Dein Ergebnis wurde erfolgreich zu {} berichtigt.".format(corrected_number), font=("Arial", 12), bg="white")
             correction_label.pack(pady=10)
 
-            close_button = Button(second_popup, text="Schließen", command=lambda: close_popups([second_popup, popup]), font=("Arial", 12), bg="#2196F3", fg="white", relief="groove")
+            close_button = Button(second_correction_popup, text="Schließen", command=lambda: close_popups([correction_popup, second_correction_popup]), font=("Arial", 12), bg="#2196F3", fg="white", relief="groove")
             close_button.pack()
 
             # Trainiere das Modell mit den berichtigten Zahlen
@@ -94,17 +94,21 @@ def correct_number(is_correct):
             y_train = to_categorical(y_train, num_classes=10)
             model.fit(x_train, y_train, epochs=1, batch_size=32)
 
-        continue_button = Button(popup, text="Fortfahren", command=continue_correction, font=("Arial", 12), bg="#2196F3", fg="white", relief="groove")
+        continue_button = Button(correction_popup, text="Fortfahren", command=continue_correction, font=("Arial", 12), bg="#2196F3", fg="white", relief="groove")
         continue_button.pack()
 
-# Funktion zum Schließen des Popups
+# Funktion zum Schließen des Pop-ups
 def close_popup(popup):
     popup.destroy()
 
-# Funktion zum Schließen mehrerer Popups
+# Funktion zum Schließen der Pop-ups
 def close_popups(popups):
     for popup in popups:
         popup.destroy()
+
+# Funktion zum Schließen des Fensters
+def close_window():
+    root.destroy()
 
 # Erstellen des Hauptfensters
 root = Tk()
@@ -138,7 +142,7 @@ wrong_button = Button(root, text="Falsch erkannt", command=lambda: correct_numbe
 wrong_button.place(x=220, y=500)
 
 # Erstellen des Schließen-Buttons
-close_button = Button(root, text="X", command=lambda: close_popups([correction_popup, second_correction_popup]), font=("Arial", 14), bg="red", fg="white", relief="groove", activeforeground="white", activebackground="red")
+close_button = Button(root, text="X", command=close_window, font=("Arial", 14), bg="red", fg="white", relief="groove", activeforeground="white", activebackground="red")
 close_button.place(x=280, y=380)
 
 # Funktion zum Ändern des Schließen-Button-Textes beim Überfahren mit der Maus
@@ -155,5 +159,4 @@ close_button.bind("<Leave>", reset_close_button_text)
 
 # Hauptfenster anzeigen
 root.mainloop()
-
 
